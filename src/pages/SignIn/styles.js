@@ -1,5 +1,5 @@
 import styled, {keyframes} from 'styled-components'
-import backgroundImg from '../../images/background-login.jpg'
+import backgroundImg from '../../images/bg.jpg'
 
 export const Background = styled.div`
 background: url(${backgroundImg});

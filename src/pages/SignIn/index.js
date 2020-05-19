@@ -1,64 +1,138 @@
-import React, {useState, useCallback} from 'react';
-import { Button, Input, Row } from 'antd';
+import React, { useState } from 'react';
+import { Button, Input, Row, Modal } from 'antd';
 import {Container, AnimationContainer, Background} from './styles'
-import { MailOutlined, LockOutlined, UserOutlined, ArrowRightOutlined, LoginOutlined } from '@ant-design/icons';
 import './styles.less'
-import { Link, useHistory } from 'react-router-dom';
-import api from '../../services/api'
+import { useCallback } from 'react';
 
 const SignIn = () => {
-    const [name, setName] = useState('');
-    const [password, setPassword] = useState('');
-    const [email, setEmail] = useState('')
-    const history = useHistory()
+    const [visible, setVisible] = useState(false)
+    const [visible2, setVisible2] = useState(false)
+    const [fila, setFila] = useState([])
+    const [nome, setNome] = useState('')
+    const [valor, setValor] = useState()
+    const [quantum, setQuantum] = useState(1)
+    const [tempoEspera, setTempoEspera] = useState([])
+    const [tempoResposta, setTempoResposta] = useState([]) 
+    const [tempoMedioEspera, setTempoMEdioEspera] = useState()
+    const [tempoMedioResposta, setTempoMedioResposta] = useState()
+    const [filaTemporaria, setFilaTemporaria] = useState([])
 
-    const handleSubmit = useCallback(async (e) => {
-        e.preventDefault()
+    //valor = tempo do processador
 
-        try{
+    const circular = useCallback(() => {
+        let index = 0
+        let final = 0
+        while(fila.length > 0){
+            if(fila.length === index + 1){
+                index = 0
+            }else{
+                let processo = fila[index]
+            if(processo.valor <= quantum ){
 
-        const data = {
-            name: name,
-            password: password,
-            email: email
+                setFilaTemporaria([...filaTemporaria, {
+                   nome: processo.nome,
+                    valor: processo.valor,
+                    tempoResposta: final - processo.execucao
+               }])
+               fila.splice(index, 1)
+            }
+            else{
+                let processo = fila[index]
+                let temp = processo.valor - quantum;
+                final += quantum
+                let array = fila
+                array[index] = {
+                    nome: processo.nome,
+                    valor: temp,
+                    execucao: processo.execucao + quantum
+                }
+                index += 1
+                
+            }
+            }
         }
+        
+    }, [fila, filaTemporaria, quantum])
 
-        const response = await api.post('/users', data);
 
-        const {token} = response.data
+    const inserir = useCallback(() => {
+        if(parseInt(quantum) === 0 && parseInt(valor) === 0){
+            console.log('nao seja viadao')
+        }
+        else{
+            const objeto = {
+                nome: nome,
+                valor: parseInt(valor),
+                execucao: 0
+            }
+            setQuantum(parseInt(quantum))
 
-        localStorage.setItem('token', token);
-
-        history.push('/home')
-    }catch(err){
-        console.log(err)
-    }
-
-    }, [history, email, name, password])
+            setFila([...fila, objeto])
+            
+        }
+    }, [fila, nome, quantum, valor])
 
     return (
         <>
         <Background>
         <Container>
                 <AnimationContainer>
-                    <form onSubmit={handleSubmit}>
-                        <Row>
-                            <Input onChange={(e) => setName(e.target.value)} className="input" style={{width: 300}} size="large" placeholder="Nome" prefix={<UserOutlined />} />
-                        </Row>
-                        <Row>
-                            <Input onChange={(e) => setEmail(e.target.value)} className="input" style={{width: 300}} size="large" placeholder="Email" prefix={<MailOutlined />} />
-                        </Row>
-                        <Row>
-                            <Input.Password onChange={(e) => setPassword(e.target.value)} className="input" style={{width: 300}} size="large" placeholder="Senha" prefix={<LockOutlined />} />
-                        </Row>
+                    <form >
+
                         <Row style={{display: 'flex', justifyContent: 'center'}}>
                         </Row>
                         <Row style={{display: 'flex', justifyContent: 'center'}}>
-                            <Button onClick={handleSubmit} shape="round" className="button" type="primary" danger><Link to='/home'><LoginOutlined style={{paddingRight: 10}} />Logar</Link></Button>
+                            <Button shape="round" onClick={() => setVisible(true)} className="button" type="primary" danger>Inserir</Button>
+                        <Modal
+                            title="Inserir"
+                            visible={visible}
+                            onOk={() => {
+                            setVisible(false)
+                            inserir()
+                            }}
+                            onCancel={() => setVisible(false)}
+                            >                        
+                            <Row>
+                                <Input  className="input" onChange={(e) => setNome(e.target.value)} style={{width: 300}} size="large" placeholder="Nome do processo"/>
+                            </Row>
+                            <Row>
+                                <Input  className="input" onChange={(e) => setValor(e.target.value)} style={{width: 300}} size="large" placeholder="Tempo do processador" />
+                            </Row>
+                            <Row>
+                                <Input value={quantum} className="input" onChange={(e) => setQuantum(e.target.value)} style={{width: 300}} size="large" placeholder="Quantum" />
+                            </Row>
+                        </Modal>
                         </Row>
-                        <Link className="link-to-login" to='/signup'>
-                            <h4 className="go-back-login"><ArrowRightOutlined style={{paddingRight: 10}} />Não tem conta? Cadastre-se</h4>
-                        </Link>
+                        
+                            <Row>
+                                <Button shape="round" onClick={() => setVisible2(true)} className="button" type="primary" danger>Mostrar</Button>
+                                    <Modal
+                                    title="Mostrar"
+                                    visible={visible2}
+                                    onOk={() => {
+                                    setVisible2(false)
+                                    }}
+                                    onCancel={() => setVisible2(false)}>
+                                        {fila.map(item => {
+                                            return(
+                                                <>
+                                                <div>
+                                                    <span>Nome do processo: {item.nome}</span>
+                                                </div>
+                                                
+                                                <span>Tempo de resposta: {item.valor}</span>
+                                                </>
+                                            )
+                                        })}
+                                    </Modal> 
+                            </Row>
+                            <Row>
+                                <Button shape="round" onClick={() => {
+                                    circular()
+                                    console.log(filaTemporaria)}} className="button" type="primary" danger>Circular</Button>
+                            </Row>
+                        
+                            
                     </form>
                 </AnimationContainer>
         </Container>

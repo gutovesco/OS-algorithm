@@ -7,6 +7,7 @@ import { useCallback } from 'react';
 const SignIn = () => {
     const [visible, setVisible] = useState(false)
     const [visible2, setVisible2] = useState(false)
+    const [resultado, setResultado] = useState(false)
     const [fila, setFila] = useState([])
     const [nome, setNome] = useState('')
     const [valor, setValor] = useState()
@@ -17,47 +18,64 @@ const SignIn = () => {
     const [tempoMedioResposta, setTempoMedioResposta] = useState()
     const [filaTemporaria, setFilaTemporaria] = useState([])
 
+    const [tabelaResultado, setTabelaResultado] = useState();
+
     //valor = tempo do processador
 
     const circular = useCallback(() => {
 
-        var dados = fila;
-        console.log("fila" + JSON.stringify(dados))
-        console.log("dados" + dados)
-        console.log("q" + quantum)
-        
-        var dadosTemp = [];
+        let dadosTemp = [];
 
         var index = 0;
 
-        //var quantum = quantum;
+        var dados = fila;
+
         var tempoTotal = 0;
+		var tme = 0;
+		var tmr = 0;
+		var tempo_turnaround = [];
+		var tep = [];
+		var tpp = [];
 
         while(dados.length > 0){
-            console.log("while")
-            console.log(JSON.stringify(dados))
-            var processo = dados[index];
+
+            let processo = dados[index];
+			
+			tempoTotal += quantum;
 
             if(processo.tempo > quantum){
                 dados[index] = {
                 nome: processo.nome,
-                tempo : parseInt(processo.tempo) - parseInt(quantum),
-                tempoExecucao: parseInt(processo.tempoExecucao) + parseInt(quantum),
+                tempo : processo.tempo - quantum,
+                tempoExecucao: processo.tempoExecucao + quantum,
                 }
 
             }else{
                 dadosTemp.push({
                 nome: processo.nome,
                 tempo : 0,
-                tempoExecucao: parseInt(processo.tempoExecucao) + parseInt(processo.tempo),
-                tempoTotal : parseInt(tempoTotal) - (parseInt(processo.tempoExecucao) + parseInt(processo.tempo))
+                tempoExecucao: processo.tempoExecucao + processo.tempo,
+                tempoTotal : tempoTotal - (processo.tempoExecucao + processo.tempo)
                 })
-
+				
+				var somaFinal = processo.tempoExecucao + processo.tempo + (tempoTotal - (processo.tempoExecucao + processo.tempo)); 
+				
+				tme += tempoTotal - (processo.tempoExecucao + processo.tempo);
+				tmr += somaFinal;
+				
+				tempo_turnaround.push(`${processo.nome} = ${somaFinal}`)
+				
+				tep.push(`${processo.nome} = ${tempoTotal - (processo.tempoExecucao + processo.tempo)}`)
+				
+				tpp.push(`${processo.nome} = ${processo.tempoExecucao + processo.tempo}`);
+				
                 dados.splice(index, 1);
 
             }
 
             index += 1;
+			
+
 
             if(index === dados.length){
                 index = 0;
@@ -69,7 +87,16 @@ const SignIn = () => {
 
         }
 
-        console.log(dadosTemp)
+        setResultado(true)
+		
+		console.log("Resultado")
+		
+		console.log(`Tempo turnaround: ${JSON.stringify(tempo_turnaround)}`)
+		console.log(`Tempo médio de retorno (TMR): ${tmr / dadosTemp.length}`)
+		console.log(`Tempo de espera de cada processo (TEP): ${JSON.stringify(tep)}`)
+		console.log(`Tempo médio de espera (TME): ${tme / dadosTemp.length}`)
+		console.log(`Tempo de processamento de cada processo: ${JSON.stringify(tpp)}`)
+		console.log(`Tempo de processamento total do processador: ${tempoTotal}`)
         
     }, [fila, filaTemporaria, quantum])
 
@@ -81,8 +108,10 @@ const SignIn = () => {
         else{
             const objeto = {
                 nome: nome,
-                valor: parseInt(valor),
-                execucao: 0
+                tempo: parseInt(valor),
+                tempoExecucao: 0,
+                tempoTotal: 0,
+
             }
             setQuantum(parseInt(quantum))
 
@@ -120,6 +149,19 @@ const SignIn = () => {
                             <Row>
                                 <Input value={quantum} className="input" onChange={(e) => setQuantum(parseInt(e.target.value))} style={{width: 300}} size="large" placeholder="Quantum" />
                             </Row>
+                        </Modal>
+                        <Modal
+                            title="Resultado"
+                            visible={resultado}
+                            onOk={() => {
+                            setVisible(false)
+                            inserir()
+                            }}
+                            onCancel={() => setResultado(false)}
+                            >                        
+                            <div>
+
+                            </div>
                         </Modal>
                         </Row>
                         

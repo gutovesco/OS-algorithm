@@ -20,37 +20,56 @@ const SignIn = () => {
     //valor = tempo do processador
 
     const circular = useCallback(() => {
-        let index = 0
-        let final = 0
-        while(fila.length > 0){
-            if(fila.length === index + 1){
-                index = 0
-            }else{
-                let processo = fila[index]
-            if(processo.valor <= quantum ){
 
-                setFilaTemporaria([...filaTemporaria, {
-                   nome: processo.nome,
-                    valor: processo.valor,
-                    tempoResposta: final - processo.execucao
-               }])
-               fila.splice(index, 1)
-            }
-            else{
-                let processo = fila[index]
-                let temp = processo.valor - quantum;
-                final += quantum
-                let array = fila
-                array[index] = {
-                    nome: processo.nome,
-                    valor: temp,
-                    execucao: processo.execucao + quantum
+        var dados = fila;
+        console.log("fila" + JSON.stringify(dados))
+        console.log("dados" + dados)
+        console.log("q" + quantum)
+        
+        var dadosTemp = [];
+
+        var index = 0;
+
+        //var quantum = quantum;
+        var tempoTotal = 0;
+
+        while(dados.length > 0){
+            console.log("while")
+            console.log(JSON.stringify(dados))
+            var processo = dados[index];
+
+            if(processo.tempo > quantum){
+                dados[index] = {
+                nome: processo.nome,
+                tempo : parseInt(processo.tempo) - parseInt(quantum),
+                tempoExecucao: parseInt(processo.tempoExecucao) + parseInt(quantum),
                 }
-                index += 1
-                
+
+            }else{
+                dadosTemp.push({
+                nome: processo.nome,
+                tempo : 0,
+                tempoExecucao: parseInt(processo.tempoExecucao) + parseInt(processo.tempo),
+                tempoTotal : parseInt(tempoTotal) - (parseInt(processo.tempoExecucao) + parseInt(processo.tempo))
+                })
+
+                dados.splice(index, 1);
+
             }
+
+            index += 1;
+
+            if(index === dados.length){
+                index = 0;
+            }else{
+                if(index > dados.length){
+                    index = 0;
+                }
             }
+
         }
+
+        console.log(dadosTemp)
         
     }, [fila, filaTemporaria, quantum])
 
@@ -96,10 +115,10 @@ const SignIn = () => {
                                 <Input  className="input" onChange={(e) => setNome(e.target.value)} style={{width: 300}} size="large" placeholder="Nome do processo"/>
                             </Row>
                             <Row>
-                                <Input  className="input" onChange={(e) => setValor(e.target.value)} style={{width: 300}} size="large" placeholder="Tempo do processador" />
+                                <Input  className="input" onChange={(e) => setValor(parseInt(e.target.value))} style={{width: 300}} size="large" placeholder="Tempo do processador" />
                             </Row>
                             <Row>
-                                <Input value={quantum} className="input" onChange={(e) => setQuantum(e.target.value)} style={{width: 300}} size="large" placeholder="Quantum" />
+                                <Input value={quantum} className="input" onChange={(e) => setQuantum(parseInt(e.target.value))} style={{width: 300}} size="large" placeholder="Quantum" />
                             </Row>
                         </Modal>
                         </Row>

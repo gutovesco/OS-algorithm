@@ -12,13 +12,8 @@ const SignIn = () => {
     const [nome, setNome] = useState('')
     const [valor, setValor] = useState()
     const [quantum, setQuantum] = useState(1)
-    const [tempoEspera, setTempoEspera] = useState([])
-    const [tempoResposta, setTempoResposta] = useState([]) 
-    const [tempoMedioEspera, setTempoMEdioEspera] = useState()
-    const [tempoMedioResposta, setTempoMedioResposta] = useState()
-    const [filaTemporaria, setFilaTemporaria] = useState([])
-
     const [tabelaResultado, setTabelaResultado] = useState([]);
+    const [add, setAdd] = useState(false)
 
     //valor = tempo do processador
 
@@ -28,7 +23,7 @@ const SignIn = () => {
 
         var index = 0;
 
-        var dados = fila;
+        var dados = fila.map(item => item)
 
         var tempoTotal = 0;
 		var tme = 0;
@@ -86,8 +81,6 @@ const SignIn = () => {
             }
 
         }
-
-        setResultado(true)
 		
         console.log("Resultado")
         
@@ -101,15 +94,8 @@ const SignIn = () => {
         ]
 
         setTabelaResultado(obj);
-		
-		//console.log(`Tempo turnaround: ${JSON.stringify(tempo_turnaround)}`)
-		//console.log(`Tempo médio de retorno (TMR): ${tmr / dadosTemp.length}`)
-		//console.log(`Tempo de espera de cada processo (TEP): ${JSON.stringify(tep)}`)
-		//console.log(`Tempo médio de espera (TME): ${tme / dadosTemp.length}`)
-		//console.log(`Tempo de processamento de cada processo: ${JSON.stringify(tpp)}`)
-		//console.log(`Tempo de processamento total do processador: ${tempoTotal}`)
         
-    }, [fila, filaTemporaria, quantum])
+    }, [fila, quantum])
 
 
     const inserir = useCallback(() => {
@@ -146,35 +132,27 @@ const SignIn = () => {
                             title="Inserir"
                             visible={visible}
                             onOk={() => {
-                            setVisible(false)
+                            setValor()
+                            setNome('')
+                            setQuantum()
+                            setAdd(true)
                             inserir()
                             }}
                             onCancel={() => setVisible(false)}
                             >                        
                             <Row>
-                                <Input  className="input" onChange={(e) => setNome(e.target.value)} style={{width: 300}} size="large" placeholder="Nome do processo"/>
+                                <Input value={nome}  className="input" onChange={(e) => setNome(e.target.value)} style={{width: 300}} size="large" placeholder="Nome do processo"/>
                             </Row>
                             <Row>
-                                <Input  className="input" onChange={(e) => setValor(parseInt(e.target.value))} style={{width: 300}} size="large" placeholder="Tempo do processador" />
+                                <Input value={valor} className="input" onChange={(e) => setValor(parseInt(e.target.value))} style={{width: 300}} size="large" placeholder="Tempo do processador" />
                             </Row>
                             <Row>
-                                <Input value={quantum} className="input" onChange={(e) => setQuantum(parseInt(e.target.value))} style={{width: 300}} size="large" placeholder="Quantum" />
+                                <Input className="input" onChange={(e) => setQuantum(parseInt(e.target.value))} style={{width: 300}} size="large" placeholder="Quantum" />
                             </Row>
-                        </Modal>
-                        <Modal
-                            title="Resultado"
-                            visible={resultado}
-                            onOk={() => {
-                            setVisible(false)
-                            }}
-                            onCancel={() => setResultado(false)}
-                            >
-
-                                {
-                                    tabelaResultado.map(item => <div key={item}>{item}</div>)
-                                }                        
+                            {add ? <Row><span style={{color: 'green'}}>Valor adicionado com sucesso!</span></Row> : <div></div>}
                             
                         </Modal>
+                        
                         </Row>
                         
                             <Row>
@@ -193,7 +171,7 @@ const SignIn = () => {
                                                     <span>Nome do processo: {item.nome}</span>
                                                 </div>
                                                 
-                                                <span>Tempo de resposta: {item.valor}</span>
+                                                <span>Tempo de resposta: {item.tempo}</span>
                                                 </>
                                             )
                                         })}
@@ -201,8 +179,24 @@ const SignIn = () => {
                             </Row>
                             <Row>
                                 <Button shape="round" onClick={() => {
+                                    setResultado(true)
                                     circular()
-                                    console.log(filaTemporaria)}} className="button" type="primary" danger>Circular</Button>
+
+                                    }} className="button" type="primary" danger>Circular</Button>
+                                    <Modal
+                                        title="Resultado"
+                                        visible={resultado}
+                                        onOk={() => {
+                                        setResultado(false)
+                                        }}
+                                        onCancel={() => setResultado(false)}
+                                        >
+
+                                            {
+                                                tabelaResultado.map(item => <div key={item}>{item}</div>)
+                                            }                        
+                                        
+                                    </Modal>
                             </Row>
                         
                             

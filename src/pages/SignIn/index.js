@@ -18,7 +18,7 @@ const SignIn = () => {
     const [tempoMedioResposta, setTempoMedioResposta] = useState()
     const [filaTemporaria, setFilaTemporaria] = useState([])
 
-    const [tabelaResultado, setTabelaResultado] = useState();
+    const [tabelaResultado, setTabelaResultado] = useState([]);
 
     //valor = tempo do processador
 
@@ -89,14 +89,25 @@ const SignIn = () => {
 
         setResultado(true)
 		
-		console.log("Resultado")
+        console.log("Resultado")
+        
+        const obj = [
+            `Tempo turnaround: ${JSON.stringify(tempo_turnaround)}`,
+           `Tempo médio de retorno (TMR): ${tmr / dadosTemp.length}`,
+            `Tempo de espera de cada processo (TEP): ${JSON.stringify(tep)}`,
+           `Tempo médio de espera (TME): ${tme / dadosTemp.length}`,
+           `Tempo de processamento de cada processo: ${JSON.stringify(tpp)}`,
+            `Tempo de processamento total do processador: ${tempoTotal}`
+        ]
+
+        setTabelaResultado(obj);
 		
-		console.log(`Tempo turnaround: ${JSON.stringify(tempo_turnaround)}`)
-		console.log(`Tempo médio de retorno (TMR): ${tmr / dadosTemp.length}`)
-		console.log(`Tempo de espera de cada processo (TEP): ${JSON.stringify(tep)}`)
-		console.log(`Tempo médio de espera (TME): ${tme / dadosTemp.length}`)
-		console.log(`Tempo de processamento de cada processo: ${JSON.stringify(tpp)}`)
-		console.log(`Tempo de processamento total do processador: ${tempoTotal}`)
+		//console.log(`Tempo turnaround: ${JSON.stringify(tempo_turnaround)}`)
+		//console.log(`Tempo médio de retorno (TMR): ${tmr / dadosTemp.length}`)
+		//console.log(`Tempo de espera de cada processo (TEP): ${JSON.stringify(tep)}`)
+		//console.log(`Tempo médio de espera (TME): ${tme / dadosTemp.length}`)
+		//console.log(`Tempo de processamento de cada processo: ${JSON.stringify(tpp)}`)
+		//console.log(`Tempo de processamento total do processador: ${tempoTotal}`)
         
     }, [fila, filaTemporaria, quantum])
 
@@ -155,13 +166,14 @@ const SignIn = () => {
                             visible={resultado}
                             onOk={() => {
                             setVisible(false)
-                            inserir()
                             }}
                             onCancel={() => setResultado(false)}
-                            >                        
-                            <div>
+                            >
 
-                            </div>
+                                {
+                                    tabelaResultado.map(item => <div key={item}>{item}</div>)
+                                }                        
+                            
                         </Modal>
                         </Row>
                         

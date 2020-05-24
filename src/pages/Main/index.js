@@ -4,7 +4,7 @@ import {Container, AnimationContainer, Background} from './styles'
 import './styles.less'
 import { useCallback } from 'react';
 
-const SignIn = () => {
+const Main = () => {
     const [visible, setVisible] = useState(false)
     const [visible2, setVisible2] = useState(false)
     const [resultado, setResultado] = useState(false)
@@ -208,4 +208,4 @@ const SignIn = () => {
     )
 }
 
-export default SignIn
+export default Main
